@@ -1,6 +1,6 @@
-# [Project name]
+# NoticeLens
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+NoticeLens helps users understand Indian GST and Income Tax notices with deterministic, knowledge-base-grounded explanations and clear next steps.
 
 ## Run & Operate
 
@@ -22,23 +22,34 @@ _Replace the heading above with the project's name, and this line with one sente
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- `artifacts/notice-lens` — mobile-first React/Vite app and RevenueCat Web SDK integration
+- `artifacts/api-server` — Express API, private cookie-scoped notice routes, and deterministic analysis
+- `lib/db/src/schema` — User, Notice, and Analysis Drizzle models
+- `lib/api-spec/openapi.yaml` — API contract source of truth
+- `knowledge-base/noticelens_tax_knowledge_base.md` — user-supplied substantive reference library
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- The uploaded notice is the primary source for facts; the knowledge base is only used for explanations and term retrieval.
+- Notice analysis intentionally uses deterministic extraction and retrieval; no live LLM is used.
+- Notice files are not persisted as bytes; the API stores notice metadata, extracted content, and analysis JSON only.
+- Anonymous signed session cookies isolate each browser's notice history without creating a local authentication system.
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+- Upload a GST or Income Tax notice, choose the tax system, and receive a structured analysis.
+- Explore three fictional demos, ask grounded questions, and save/reopen/delete notice analyses.
+- View live RevenueCat Test Store offering price, purchase, entitlement, and restore states for NoticeLens Plus.
 
 ## User preferences
 
-_Populate as you build — explicit user instructions worth remembering across sessions._
+- Keep all tax explanations grounded in the supplied NoticeLens Knowledge Base.
+- Never invent missing facts, deadlines, rates, or legal conclusions.
 
 ## Gotchas
 
-_Populate as you build — sharp edges, "always run X before Y" rules._
+- If the notice and knowledge base are insufficient, use the product's exact insufficient-information message.
+- Configure `VITE_REVENUECAT_PUBLIC_KEY` before expecting a live Plus offering.
 
 ## Pointers
 

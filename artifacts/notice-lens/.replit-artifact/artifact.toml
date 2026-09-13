@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "NoticeLens"
+description = "A premium mobile-first web app that helps people understand Indian GST and Income Tax notices, see practical next steps, ask grounded questions, and keep private notice history."
+version = "1.0.0"
+id = "artifacts/notice-lens"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 24596
+
+[services.development]
+run = "pnpm --filter @workspace/notice-lens run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/notice-lens", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/notice-lens/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "24596"
+BASE_PATH = "/"

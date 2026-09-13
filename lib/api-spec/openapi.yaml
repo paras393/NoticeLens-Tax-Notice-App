@@ -10,6 +10,8 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: notices
+    description: Private notice analysis
 paths:
   /healthz:
     get:
@@ -24,7 +26,129 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /notices:
+    get:
+      operationId: listNotices
+      tags: [notices]
+      summary: List the current user's notices
+      responses:
+        "200":
+          description: Notices
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Notice"
+    post:
+      operationId: createNotice
+      tags: [notices]
+      summary: Create a notice from an uploaded document
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NoticeInput"
+      responses:
+        "201":
+          description: Created notice
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Notice"
+  /notices/{noticeId}:
+    get:
+      operationId: getNotice
+      tags: [notices]
+      summary: Get a private notice and analysis
+      parameters:
+        - $ref: "#/components/parameters/NoticeId"
+      responses:
+        "200":
+          description: Notice
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NoticeDetail"
+        "404":
+          description: Not found
+    delete:
+      operationId: deleteNotice
+      tags: [notices]
+      summary: Delete a private notice
+      parameters:
+        - $ref: "#/components/parameters/NoticeId"
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+  /notices/{noticeId}/analyze:
+    post:
+      operationId: analyzeNotice
+      tags: [notices]
+      summary: Deterministically analyze a notice
+      parameters:
+        - $ref: "#/components/parameters/NoticeId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AnalysisInput"
+      responses:
+        "200":
+          description: Analysis
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Analysis"
+        "404":
+          description: Not found
+  /notices/{noticeId}/ask:
+    post:
+      operationId: askNotice
+      tags: [notices]
+      summary: Ask a grounded question about a notice
+      parameters:
+        - $ref: "#/components/parameters/NoticeId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AskQuestionInput"
+      responses:
+        "200":
+          description: Grounded answer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Answer"
+        "404":
+          description: Not found
+  /dashboard:
+    get:
+      operationId: getDashboard
+      tags: [notices]
+      summary: Get private history summary
+      responses:
+        "200":
+          description: Dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Dashboard"
 components:
+  parameters:
+    NoticeId:
+      name: noticeId
+      in: path
+      required: true
+      schema:
+        type: integer
+        minimum: 1
   schemas:
     HealthStatus:
       type: object
@@ -33,4 +157,124 @@ components:
           type: string
       required:
         - status
+    Notice:
+      type: object
+      required: [id, title, fileName, fileType, taxSystem, status, isDemo, createdAt]
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        fileName: { type: string }
+        fileType: { type: string }
+        taxSystem: { type: string, enum: [GST, INCOME_TAX, NOT_SURE] }
+        status: { type: string, enum: [uploaded, processing, analyzed] }
+        noticeType: { type: ["string", "null"] }
+        deadline: { type: ["string", "null"] }
+        isDemo: { type: boolean }
+        createdAt: { type: string }
+    NoticeDetail:
+      allOf:
+        - $ref: "#/components/schemas/Notice"
+        - type: object
+          properties:
+            analysis:
+              oneOf:
+                - $ref: "#/components/schemas/Analysis"
+                - type: "null"
+    NoticeInput:
+      type: object
+      required: [title, fileName, fileType, taxSystem, content]
+      properties:
+        title: { type: string }
+        fileName: { type: string }
+        fileType: { type: string }
+        taxSystem: { type: string, enum: [GST, INCOME_TAX, NOT_SURE] }
+        content: { type: string }
+        isDemo: { type: boolean, default: false }
+    AnalysisInput:
+      type: object
+      properties:
+        content: { type: string }
+        taxSystem: { type: string, enum: [GST, INCOME_TAX, NOT_SURE] }
+    Analysis:
+      type: object
+      required: [id, noticeId, noticeType, confidence, extracted, sections, terms, createdAt]
+      properties:
+        id: { type: integer }
+        noticeId: { type: integer }
+        noticeType: { type: string }
+        confidence: { type: string, enum: [high, medium, limited] }
+        extracted:
+          $ref: "#/components/schemas/ExtractedNotice"
+        sections:
+          type: array
+          items:
+            $ref: "#/components/schemas/AnalysisSection"
+        terms:
+          type: array
+          items:
+            $ref: "#/components/schemas/Term"
+        createdAt: { type: string }
+    ExtractedNotice:
+      type: object
+      required: [department, referenceNumber, noticeDate, financialYear, assessmentYear, taxPeriod, section, amounts, deadline, hearingDate, requestedAction, documents]
+      properties:
+        department: { type: string }
+        referenceNumber: { type: string }
+        noticeDate: { type: string }
+        financialYear: { type: string }
+        assessmentYear: { type: string }
+        taxPeriod: { type: string }
+        section: { type: string }
+        amounts:
+          type: array
+          items: { type: string }
+        deadline: { type: string }
+        hearingDate: { type: string }
+        requestedAction: { type: string }
+        documents:
+          type: array
+          items: { type: string }
+    AnalysisSection:
+      type: object
+      required: [key, title, body, tone]
+      properties:
+        key: { type: string }
+        title: { type: string }
+        body: { type: string }
+        tone: { type: string, enum: [default, warning, action, muted] }
+        bullets:
+          type: array
+          items: { type: string }
+    Term:
+      type: object
+      required: [term, explanation]
+      properties:
+        term: { type: string }
+        explanation: { type: string }
+    AskQuestionInput:
+      type: object
+      required: [question]
+      properties:
+        question: { type: string, minLength: 1, maxLength: 500 }
+    Answer:
+      type: object
+      required: [question, answer, groundedIn]
+      properties:
+        question: { type: string }
+        answer: { type: string }
+        groundedIn:
+          type: array
+          items: { type: string }
+    Dashboard:
+      type: object
+      required: [totalNotices, analyzedNotices, gstNotices, incomeTaxNotices, recent]
+      properties:
+        totalNotices: { type: integer }
+        analyzedNotices: { type: integer }
+        gstNotices: { type: integer }
+        incomeTaxNotices: { type: integer }
+        recent:
+          type: array
+          items:
+            $ref: "#/components/schemas/Notice"
 
