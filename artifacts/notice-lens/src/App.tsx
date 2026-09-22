@@ -18,6 +18,11 @@ import { ErrorBoundary } from '@/components/error-boundary';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import NotFound from '@/pages/not-found';
+import {
+  EXTRACTION_ERROR_MESSAGE,
+  extractUploadedFile,
+  validateExtractedText,
+} from '@/lib/document-extraction';
 
 const queryClient = new QueryClient();
 
@@ -141,6 +146,8 @@ function UploadPage() {
   const [system, setSystem] = useState<'GST' | 'INCOME_TAX' | 'NOT_SURE'>('NOT_SURE');
   const [title, setTitle] = useState('');
   const [dragging, setDragging] = useState(false);
+  const [isExtracting, setIsExtracting] = useState(false);
+  const [extractionError, setExtractionError] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
 
   const chooseFile = (next: File | undefined) => {
@@ -150,19 +157,24 @@ function UploadPage() {
     setFile(next);
     if (!title) setTitle(next.name.replace(/\.[^/.]+$/, '').replace(/[_-]/g, ' '));
   };
-  const extractUploadText = async (uploadedFile: File) => {
-    if (uploadedFile.type === 'text/plain') return uploadedFile.text().catch(() => '');
-    return `No machine-readable text was extracted from the uploaded ${uploadedFile.name} file. Do not infer facts from the file name or file type.`;
-  };
   const submit = async () => {
     if (!file || !title.trim()) return;
-    const content = await extractUploadText(file);
-    createNotice.mutate({ data: { title: title.trim(), fileName: file.name, fileType: file.type || 'application/octet-stream', taxSystem: system, content } }, {
-      onSuccess: (notice) => {
-        localStorage.setItem(`notice-content-${notice.id}`, content);
-        setLocation(`/processing?noticeId=${notice.id}`);
-      },
-    });
+    setIsExtracting(true);
+    setExtractionError('');
+    try {
+      const extractedText = validateExtractedText(await extractUploadedFile(file));
+      if (!extractedText) throw new Error(EXTRACTION_ERROR_MESSAGE);
+      createNotice.mutate({ data: { title: title.trim(), fileName: file.name, fileType: file.type || 'application/octet-stream', taxSystem: system, content: extractedText } }, {
+        onSuccess: (notice) => {
+          localStorage.setItem(`notice-content-${notice.id}`, extractedText);
+          setLocation(`/processing?noticeId=${notice.id}`);
+        },
+      });
+    } catch {
+      setExtractionError(EXTRACTION_ERROR_MESSAGE);
+    } finally {
+      setIsExtracting(false);
+    }
   };
   return (
     <main className="page" data-testid="page-upload">
@@ -173,8 +185,8 @@ function UploadPage() {
           <div className="field"><label className="field-label" htmlFor="notice-title">A name for this notice</label><input id="notice-title" className="text-input" placeholder="e.g. GST notice — March 2024" value={title} onChange={(e) => setTitle(e.target.value)} data-testid="input-notice-title" /></div>
           <div className="field"><span className="field-label">Which system is it from?</span><div className="system-options">{[['GST', 'GST'], ['INCOME_TAX', 'Income Tax'], ['NOT_SURE', 'Not sure']].map(([value, label]) => <button type="button" key={value} className={`system-option ${system === value ? 'selected' : ''}`} onClick={() => setSystem(value as typeof system)} data-testid={`button-tax-system-${value.toLowerCase()}`}>{label}<br /><small>{value === 'GST' ? 'Goods & Services Tax' : value === 'INCOME_TAX' ? 'Direct tax notices' : 'We’ll help identify it'}</small></button>)}</div></div>
           <div className="field"><span className="field-label">Upload the notice</span><div className={`drop-zone ${dragging ? 'dragging' : ''}`} onClick={() => inputRef.current?.click()} onDragOver={(e) => { e.preventDefault(); setDragging(true); }} onDragLeave={() => setDragging(false)} onDrop={(e) => { e.preventDefault(); setDragging(false); chooseFile(e.dataTransfer.files[0]); }} data-testid="dropzone-notice-file"><UploadCloud size={25} /><strong>Drop your notice here</strong><span>PDF, JPG, JPEG or PNG · Keep it under 10 MB</span><input ref={inputRef} type="file" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png" hidden onChange={(e) => chooseFile(e.target.files?.[0])} data-testid="input-notice-file" /></div>{file && <div className="file-chip" data-testid="selected-file"><span><FileText size={14} style={{ verticalAlign: 'middle', marginRight: 7 }} />{file.name}</span><button onClick={() => setFile(null)} aria-label="Remove selected file" data-testid="button-remove-file"><X size={14} /></button></div>} {!file && <p className="price-note">Only PDF, JPG, JPEG and PNG files under 10 MB are accepted.</p>}</div>
-          {createNotice.isError && <div className="config-state" data-testid="upload-error">We couldn’t save this notice. Please try again.</div>}
-          <button className="btn btn-primary btn-wide" onClick={() => void submit()} disabled={!file || !title.trim() || createNotice.isPending} data-testid="button-start-analysis">{createNotice.isPending ? <><LoaderCircle size={15} className="spin" /> Saving notice…</> : <>Continue to analysis <ArrowRight size={15} /></>}</button>
+          {(createNotice.isError || extractionError) && <div className="config-state" data-testid={extractionError ? 'extraction-error' : 'upload-error'}>{extractionError || 'We couldn’t save this notice. Please try again.'}</div>}
+          <button className="btn btn-primary btn-wide" onClick={() => void submit()} disabled={!file || !title.trim() || createNotice.isPending || isExtracting} data-testid="button-start-analysis">{isExtracting ? <><LoaderCircle size={15} className="spin" /> Reading document…</> : createNotice.isPending ? <><LoaderCircle size={15} className="spin" /> Saving notice…</> : <>Continue to analysis <ArrowRight size={15} /></>}</button>
           <p className="price-note" style={{ textAlign: 'center' }}><LockKeyhole size={12} style={{ verticalAlign: 'middle' }} /> Private workspace · We never share your documents</p>
         </section>
       </div>
