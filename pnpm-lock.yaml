@@ -418,6 +418,9 @@ importers:
       tesseract.js:
         specifier: ^7.0.0
         version: 7.0.0
+      tesseract.js-core:
+        specifier: 7.0.0
+        version: 7.0.0
     devDependencies:
       '@hookform/resolvers':
         specifier: ^3.10.0

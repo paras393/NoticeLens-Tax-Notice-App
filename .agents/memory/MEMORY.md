@@ -1,0 +1,1 @@
+- [RevenueCat Test Store currency](revenuecat-test-store-currency.md) — Test Store rejects INR; do not substitute a currency or hardcode the requested price.

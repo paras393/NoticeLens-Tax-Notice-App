@@ -1,5 +1,5 @@
 import * as pdfjsLib from 'pdfjs-dist';
-import { createWorker } from 'tesseract.js';
+import { createWorker, type ImageLike } from 'tesseract.js';
 import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import tesseractWorkerUrl from 'tesseract.js/dist/worker.min.js?url';
 import tesseractCoreUrl from 'tesseract.js-core/tesseract-core-simd-lstm.wasm.js?url';
@@ -84,7 +84,7 @@ async function renderPdfPagesForOcr(file: File): Promise<HTMLCanvasElement[]> {
     if (!context) throw new Error("Canvas is not available for PDF OCR.");
     canvas.width = Math.ceil(viewport.width);
     canvas.height = Math.ceil(viewport.height);
-    await page.render({ canvasContext: context, viewport }).promise;
+    await page.render({ canvas, canvasContext: context, viewport }).promise;
     canvases.push(canvas);
   }
 
