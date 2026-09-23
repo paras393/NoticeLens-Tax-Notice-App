@@ -39,26 +39,37 @@ function Logo() {
 
 function Shell({ children }: { children: ReactNode }) {
   const [location] = useLocation();
+  const primaryNav = navItems.slice(0, 2);
+  const referenceNav = navItems.slice(2);
+  const contextLabel = location === '/' ? 'Overview' : location.startsWith('/notice/') ? 'Notice brief' : location === '/upload' ? 'New intake' : location === '/history' ? 'Private archive' : location === '/demo' ? 'Explore examples' : location === '/knowledge-base' ? 'Reference library' : location === '/pricing' ? 'NoticeLens Plus' : 'NoticeLens';
   return (
     <div className="app-shell">
       <aside className="sidebar">
-        <Logo />
+        <div className="rail-heading"><Logo /><span className="rail-status"><i /> private workspace</span></div>
         <nav className="side-nav" aria-label="Primary navigation">
-          {navItems.map(({ href, label, icon: Icon }) => (
+          <div className="nav-group"><div className="nav-group-label">Workspace</div>{primaryNav.map(({ href, label, icon: Icon }) => (
+            <Link key={href} href={href} className={`side-link ${location === href ? 'active' : ''}`} data-testid={`link-nav-${label.toLowerCase().replaceAll(' ', '-')}`}>
+              <Icon size={16} strokeWidth={1.7} /> <span>{label}</span>{href === '/' && <span className="nav-key">01</span>}
+            </Link>
+          ))}</div>
+          <div className="nav-group"><div className="nav-group-label">Reference</div>{referenceNav.map(({ href, label, icon: Icon }) => (
             <Link key={href} href={href} className={`side-link ${location === href ? 'active' : ''}`} data-testid={`link-nav-${label.toLowerCase().replaceAll(' ', '-')}`}>
               <Icon size={16} strokeWidth={1.7} /> <span>{label}</span>
             </Link>
-          ))}
+          ))}</div>
+          <div className="nav-group nav-secondary"><div className="nav-group-label">Try it safely</div>
+            <Link href="/demo" className={`side-link ${location === '/demo' ? 'active' : ''}`} data-testid="link-nav-demo"><FileCheck2 size={16} strokeWidth={1.7} /><span>Demo notices</span></Link>
+          </div>
         </nav>
         <div className="side-foot">
           <LockKeyhole size={14} />
-          <div style={{ marginTop: 9 }}>Private by design.<br />Your notices stay yours.</div>
+          <div>Private by design.<br />Your notices stay yours.</div>
         </div>
       </aside>
       <div className="main-wrap">
         <header className="topbar">
-          <span className="eyebrow">{location === '/' ? 'Private workspace' : 'NoticeLens'}</span>
-          <div className="top-action"><span>Indian tax notices, made clear</span><span className="avatar" data-testid="avatar-user">AK</span></div>
+          <div className="top-context"><span className="topbar-mark" aria-hidden="true" /><span className="eyebrow">NoticeLens</span><ChevronRight size={13} /><span className="top-context-current">{contextLabel}</span></div>
+          <div className="top-action"><span className="top-note">Indian tax notices, made clear</span><span className="avatar" data-testid="avatar-user">AK</span></div>
         </header>
         {children}
         <nav className="mobile-bar" aria-label="Mobile navigation">
@@ -87,17 +98,19 @@ function TaxBadge({ system }: { system: string }) {
 }
 
 function NoticeRow({ notice, onDelete }: { notice: Notice; onDelete?: (id: number) => void }) {
-   const [location, setLocation] = useLocation();
   return (
-    <div className="card notice-row" data-testid={`row-notice-${notice.id}`}>
-      <div onClick={() => setLocation(`/notice/${notice.id}`)} style={{ cursor: 'pointer' }}>
+    <article className="card notice-row" data-testid={`row-notice-${notice.id}`}>
+      <Link href={`/notice/${notice.id}`} className="notice-row-main">
+        <span className="notice-row-index" aria-hidden="true">/</span>
+        <span>
         <div className="notice-name">{notice.title || notice.fileName}</div>
         <div className="notice-meta">{notice.fileName} · {new Date(notice.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</div>
-      </div>
+        </span>
+      </Link>
       <TaxBadge system={notice.taxSystem} />
-      <div className={notice.deadline ? 'deadline' : 'notice-meta'}>{notice.deadline ? `Due ${notice.deadline}` : notice.status === 'analyzed' ? 'Analysed' : 'Processing'}</div>
+      <div className={`notice-status ${notice.deadline ? 'deadline' : 'notice-meta'}`}><span className="status-dot" aria-hidden="true" />{notice.deadline ? `Due ${notice.deadline}` : notice.status === 'analyzed' ? 'Analysed' : 'Processing'}</div>
       {onDelete && <button className="btn btn-quiet" style={{ padding: 8 }} onClick={() => onDelete(notice.id)} aria-label={`Delete ${notice.title}`} data-testid={`button-delete-notice-${notice.id}`}><Trash2 size={14} /></button>}
-    </div>
+    </article>
   );
 }
 
@@ -108,21 +121,25 @@ function Home() {
   const recent = dashboard?.recent ?? [];
   return (
     <main className="page" data-testid="page-overview">
-      <div className="eyebrow">Good morning, Aditi</div>
+      <div className="page-kicker"><span>Good morning, Aditi</span><span className="mono-note">WORKSPACE / 01</span></div>
       <div className="hero-grid">
-        <section className="card hero-panel">
-          <div className="eyebrow" style={{ color: '#a8c4b9' }}>Your notice companion</div>
-          <h1 className="hero-title">From official <em>language</em> to a next step.</h1>
-          <p className="hero-sub">Upload a GST or Income Tax notice. NoticeLens highlights the deadline, explains the request, and keeps every answer grounded in the notice and our reference library.</p>
-          <div className="hero-actions">
-            <Link href="/upload" className="btn btn-primary" data-testid="button-upload-notice"><UploadCloud size={16} /> Upload your notice</Link>
-            <Link href="/demo" className="btn btn-secondary" data-testid="button-see-demo"><FileCheck2 size={15} /> See a demo</Link>
+        <section className="hero-panel">
+          <div className="hero-panel-copy">
+            <div className="eyebrow">Your notice companion</div>
+            <h1 className="hero-title">From official <em>language</em> to a next step.</h1>
+            <p className="hero-sub">Upload a GST or Income Tax notice. NoticeLens highlights the deadline, explains the request, and keeps every answer grounded in the notice and our reference library.</p>
+            <div className="hero-actions">
+              <Link href="/upload" className="btn btn-primary" data-testid="button-upload-notice"><UploadCloud size={16} /> Upload your notice</Link>
+              <Link href="/demo" className="btn btn-secondary" data-testid="button-see-demo"><FileCheck2 size={15} /> See a demo</Link>
+            </div>
           </div>
+          <div className="hero-index" aria-hidden="true"><span>NL</span><span>01—04</span></div>
         </section>
-        <section className="card welcome-card">
-          <div><div className="eyebrow">A calmer way through</div><h2>Clarity before you respond.</h2></div>
-          <div><div className="quiet-rule" /><p>NoticeLens is not a lawyer or a chatbot. It is a careful reading layer for the document in front of you.</p></div>
-          <Link href="/knowledge-base" className="text-button" data-testid="link-learn-grounding">How our explanations are grounded <ArrowRight size={13} style={{ verticalAlign: 'middle' }} /></Link>
+        <section className="welcome-card">
+          <div className="welcome-label"><span className="signal-line" />A calmer way through</div>
+          <h2>Clarity before you respond.</h2>
+          <p>NoticeLens is not a lawyer or a chatbot. It is a careful reading layer for the document in front of you.</p>
+          <Link href="/knowledge-base" className="text-button" data-testid="link-learn-grounding">How our explanations are grounded <ArrowRight size={13} /></Link>
         </section>
       </div>
       <div className="stats-grid">
@@ -133,7 +150,7 @@ function Home() {
           ['Income Tax', dashboard?.incomeTaxNotices ?? 0, FileCheck2],
         ] as const).map(([label, value, Icon]) => <div className="card stat" key={String(label)} data-testid={`stat-${String(label).toLowerCase().replace(' ', '-')}`}><Icon size={15} color="var(--teal)" /><div className="stat-number">{String(value)}</div><div className="stat-label">{String(label)}</div></div>)}
       </div>
-      <div className="section-head"><h2>Recent notices</h2><Link href="/history" className="text-button" data-testid="link-view-all-notices">View all <ChevronRight size={13} style={{ verticalAlign: 'middle' }} /></Link></div>
+      <div className="section-head"><div><div className="eyebrow">Private archive</div><h2>Recent notices</h2></div><Link href="/history" className="text-button" data-testid="link-view-all-notices">View all <ChevronRight size={13} /></Link></div>
       {recent.length ? <div className="notice-list">{recent.slice(0, 4).map((notice) => <NoticeRow key={notice.id} notice={notice} />)}</div> : <div className="card empty" data-testid="empty-recent-notices"><div className="empty-icon"><FileText size={20} /></div><h3>Your first notice goes here</h3><p>Upload a document and we will turn its official language into a clear, structured brief.</p><Link href="/upload" className="btn btn-primary" data-testid="button-empty-upload"><Plus size={15} /> Upload a notice</Link></div>}
     </main>
   );
@@ -179,9 +196,10 @@ function UploadPage() {
   return (
     <main className="page" data-testid="page-upload">
       <div className="page-head"><div><div className="eyebrow">Step 01 / Add a document</div><h1 className="page-title">Let’s make this<br /><span className="serif">readable.</span></h1><p className="page-copy">Your original file is used only to understand this notice. Select the tax system if you know it; “Not sure” is a perfectly good answer.</p></div><Link href="/" className="btn btn-quiet" data-testid="button-cancel-upload"><ArrowLeft size={15} /> Back</Link></div>
-      <div className="card split-card">
-        <aside className="split-aside"><div className="eyebrow" style={{ color: '#9dbab0' }}>What happens next</div><h2>Three quiet steps.</h2><p>No dense report. No invented advice. Just the important parts, in order.</p><div className="step-list"><div className="step"><span className="step-no">01</span><span><b>Read</b><br />We extract the document’s own signals.</span></div><div className="step"><span className="step-no">02</span><span><b>Organise</b><br />Deadline, request, amount and section.</span></div><div className="step"><span className="step-no">03</span><span><b>Explain</b><br />Clear context, grounded in our library.</span></div></div></aside>
+      <div className="split-card intake-layout">
+        <aside className="split-aside"><div className="eyebrow">What happens next</div><h2>Three quiet steps.</h2><p>No dense report. No invented advice. Just the important parts, in order.</p><div className="step-list"><div className="step"><span className="step-no">01</span><span><b>Read</b><br />We extract the document’s own signals.</span></div><div className="step"><span className="step-no">02</span><span><b>Organise</b><br />Deadline, request, amount and section.</span></div><div className="step"><span className="step-no">03</span><span><b>Explain</b><br />Clear context, grounded in our library.</span></div></div><div className="aside-footnote"><ShieldCheck size={14} /> Source text stays in your private workspace.</div></aside>
         <section className="upload-main">
+          <div className="form-heading"><div><div className="eyebrow">Notice intake</div><h2>Tell us what we are reading.</h2></div><span className="mono-note">PDF / IMAGE · 10MB</span></div>
           <div className="field"><label className="field-label" htmlFor="notice-title">A name for this notice</label><input id="notice-title" className="text-input" placeholder="e.g. GST notice — March 2024" value={title} onChange={(e) => setTitle(e.target.value)} data-testid="input-notice-title" /></div>
           <div className="field"><span className="field-label">Which system is it from?</span><div className="system-options">{[['GST', 'GST'], ['INCOME_TAX', 'Income Tax'], ['NOT_SURE', 'Not sure']].map(([value, label]) => <button type="button" key={value} className={`system-option ${system === value ? 'selected' : ''}`} onClick={() => setSystem(value as typeof system)} data-testid={`button-tax-system-${value.toLowerCase()}`}>{label}<br /><small>{value === 'GST' ? 'Goods & Services Tax' : value === 'INCOME_TAX' ? 'Direct tax notices' : 'We’ll help identify it'}</small></button>)}</div></div>
           <div className="field"><span className="field-label">Upload the notice</span><div className={`drop-zone ${dragging ? 'dragging' : ''}`} onClick={() => inputRef.current?.click()} onDragOver={(e) => { e.preventDefault(); setDragging(true); }} onDragLeave={() => setDragging(false)} onDrop={(e) => { e.preventDefault(); setDragging(false); chooseFile(e.dataTransfer.files[0]); }} data-testid="dropzone-notice-file"><UploadCloud size={25} /><strong>Drop your notice here</strong><span>PDF, JPG, JPEG or PNG · Keep it under 10 MB</span><input ref={inputRef} type="file" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png" hidden onChange={(e) => chooseFile(e.target.files?.[0])} data-testid="input-notice-file" /></div>{file && <div className="file-chip" data-testid="selected-file"><span><FileText size={14} style={{ verticalAlign: 'middle', marginRight: 7 }} />{file.name}</span><button onClick={() => setFile(null)} aria-label="Remove selected file" data-testid="button-remove-file"><X size={14} /></button></div>} {!file && <p className="price-note">Only PDF, JPG, JPEG and PNG files under 10 MB are accepted.</p>}</div>
@@ -206,18 +224,18 @@ function ProcessingPage() {
       onSuccess: () => setTimeout(() => setLocation(`/notice/${noticeId}`), 700),
     });
   }, [noticeId, analyze.isPending, analyze.isSuccess, setLocation]);
-  return <main className="page" data-testid="page-processing"><div className="processing"><div className="processing-mark"><FileCheck2 size={32} /></div><div className="eyebrow">Step 02 / Reading your notice</div><h1>Finding the signal<br /><span className="serif">inside the paperwork.</span></h1><p>We’re looking for dates, amounts, sections and the exact action the department is asking for.</p><div className="progress-track"><div className="progress-bar" /></div><div className="processing-note">{analyze.isError ? 'Could not finish reading this document.' : 'This usually takes a few seconds · no legal conclusions are made'}</div>{analyze.isError && <button className="btn btn-secondary" style={{ marginTop: 20 }} onClick={() => analyze.reset()} data-testid="button-retry-analysis"><RefreshCcw size={14} /> Try again</button>}</div></main>;
+  return <main className="page" data-testid="page-processing"><div className="processing"><div className="processing-topline"><span className="eyebrow">Step 02 / Reading your notice</span><span className="mono-note">ANALYSIS IN PROGRESS</span></div><div className="processing-mark"><FileCheck2 size={32} /></div><h1>Finding the signal<br /><span className="serif">inside the paperwork.</span></h1><p>We’re looking for dates, amounts, sections and the exact action the department is asking for.</p><div className="processing-track-label"><span>Reading document</span><span>Careful pass</span></div><div className="progress-track"><div className="progress-bar" /></div><div className="processing-note">{analyze.isError ? 'Could not finish reading this document.' : 'This usually takes a few seconds · no legal conclusions are made'}</div>{analyze.isError && <button className="btn btn-secondary" style={{ marginTop: 20 }} onClick={() => analyze.reset()} data-testid="button-retry-analysis"><RefreshCcw size={14} /> Try again</button>}</div></main>;
 }
 
 function ExtractedCard({ detail }: { detail: NoticeDetail }) {
   const extracted = detail.analysis?.extracted;
   if (!extracted) return null;
   const values = [['Department', extracted.department], ['Reference no.', extracted.referenceNumber], ['Notice date', extracted.noticeDate], ['Financial year', extracted.financialYear], ['Assessment year', extracted.assessmentYear], ['Tax period', extracted.taxPeriod], ['Section', extracted.section], ['Hearing date', extracted.hearingDate]];
-  return <div className="card extract-card" data-testid="card-extracted-details"><h2>What we found in the notice</h2><dl className="extract-grid">{values.map(([label, value]) => <div className="extract-item" key={label}><dt>{label}</dt><dd>{value || 'Not found in the notice.'}</dd></div>)}<div className="extract-item important"><dt>Deadline</dt><dd>{extracted.deadline || 'Not found in the notice.'}</dd></div><div className="extract-item important"><dt>Action requested</dt><dd>{extracted.requestedAction || 'Not found in the notice.'}</dd></div></dl>{extracted.amounts?.length > 0 && <><div className="quiet-rule" /><div className="eyebrow">Amounts mentioned</div><div style={{ marginTop: 7, fontSize: 13 }}>{extracted.amounts.join(' · ')}</div></>}{extracted.documents?.length > 0 && <><div className="quiet-rule" /><div className="eyebrow">Documents to keep ready</div><ul className="bullet-list" style={{ marginBottom: 0 }}>{extracted.documents.map((document) => <li key={document}>{document}</li>)}</ul></>}</div>;
+  return <section className="card extract-card" data-testid="card-extracted-details"><div className="panel-heading"><div><div className="eyebrow">Evidence / extracted</div><h2>What we found in the notice</h2></div><span className="panel-index">02</span></div><dl className="extract-grid">{values.map(([label, value]) => <div className="extract-item" key={label}><dt>{label}</dt><dd>{value || 'Not found in the notice.'}</dd></div>)}<div className="extract-item important"><dt>Deadline</dt><dd>{extracted.deadline || 'Not found in the notice.'}</dd></div><div className="extract-item important"><dt>Action requested</dt><dd>{extracted.requestedAction || 'Not found in the notice.'}</dd></div></dl>{extracted.amounts?.length > 0 && <><div className="quiet-rule" /><div className="eyebrow">Amounts mentioned</div><div className="evidence-values">{extracted.amounts.join(' · ')}</div></>}{extracted.documents?.length > 0 && <><div className="quiet-rule" /><div className="eyebrow">Documents to keep ready</div><ul className="bullet-list" style={{ marginBottom: 0 }}>{extracted.documents.map((document) => <li key={document}>{document}</li>)}</ul></>}</section>;
 }
 
 function AskCard({ noticeId }: { noticeId: number }) {
-  return <section className="ask-card" data-testid="card-ask-notice"><MessageCircle size={19} color="#f0c99e" /><h2>Ask my notice</h2><p>Open a dedicated page to ask about this document.</p><Link href={`/notice/${noticeId}/ask`} className="btn btn-secondary" data-testid="button-open-ask-notice">Ask a question <ArrowRight size={15} /></Link></section>;
+  return <section className="ask-card" data-testid="card-ask-notice"><div className="ask-card-top"><span className="ask-icon"><MessageCircle size={17} /></span><span className="eyebrow">Grounded help</span><span className="panel-index">03</span></div><h2>Ask my notice</h2><p>Open a dedicated page to ask about this document. Answers stay within the notice and the supplied reference library.</p><Link href={`/notice/${noticeId}/ask`} className="btn btn-secondary" data-testid="button-open-ask-notice">Ask a question <ArrowRight size={15} /></Link></section>;
 }
 
 function AskNoticePage() {
@@ -235,7 +253,19 @@ function AskNoticePage() {
   };
   if (isLoading) return <LoadingState label="Opening Ask My Notice" />;
   if (isError || !detail) return <div className="page"><ErrorState retry={() => void refetch()} /></div>;
-  return <main className="page" data-testid={`page-ask-notice-${id}`}><div className="page-head"><div><div className="eyebrow">Ask My Notice</div><h1 className="page-title">A clear answer<br /><span className="serif">about this notice.</span></h1><p className="page-copy">{detail.title} · Ask about the deadline, documents, amount, section or next step.</p></div><Link href={`/notice/${id}`} className="btn btn-quiet" data-testid="button-back-to-notice"><ArrowLeft size={15} /> Back to notice</Link></div><section className="card ask-page-card"><MessageCircle size={25} color="#f0c99e" /><h2>What would you like to know?</h2><p>Answers are limited to the uploaded notice and the supplied NoticeLens Knowledge Base. NoticeLens will say when there is not enough information.</p><div className="ask-input-wrap"><input autoFocus className="text-input" value={question} onChange={(e) => setQuestion(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') submit(); }} placeholder="Write your question" maxLength={500} data-testid="input-ask-notice-page" /><button className="btn btn-primary" onClick={() => submit()} disabled={!question.trim() || ask.isPending} data-testid="button-ask-notice-page">{ask.isPending ? <LoaderCircle size={15} className="spin" /> : <>Ask <ArrowRight size={15} /></>}</button></div><div className="suggestions">{suggestions.map((suggestion) => <button className="suggestion" key={suggestion} onClick={() => submit(suggestion)} data-testid={`button-ask-suggestion-${suggestion.slice(0, 10).replaceAll(' ', '-').toLowerCase()}`}>{suggestion}</button>)}</div>{ask.isError && <div className="answer" data-testid="answer-notice-error">I don't have enough information in this notice and the NoticeLens Knowledge Base to answer that reliably.</div>}{ask.data && <div className="answer" data-testid="answer-notice"><b>{ask.data.answer}</b></div>}</section></main>;
+  return <main className="page" data-testid={`page-ask-notice-${id}`}>
+    <div className="crumb-row"><Link href={`/notice/${id}`} className="crumb-link"><ArrowLeft size={13} /> Notice brief</Link><span className="mono-note">ASK / GROUNDED</span></div>
+    <div className="page-head"><div><div className="eyebrow">Ask My Notice</div><h1 className="page-title">A clear answer<br /><span className="serif">about this notice.</span></h1><p className="page-copy">{detail.title} · Ask about the deadline, documents, amount, section or next step.</p></div><Link href={`/notice/${id}`} className="btn btn-quiet" data-testid="button-back-to-notice"><ArrowLeft size={15} /> Back to notice</Link></div>
+    <section className="ask-page-card">
+      <div className="ask-page-intro"><span className="ask-icon large"><MessageCircle size={22} /></span><div><div className="eyebrow">NoticeLens reference layer</div><h2>What would you like to know?</h2></div></div>
+      <p>Answers are limited to the uploaded notice and the supplied NoticeLens Knowledge Base. NoticeLens will say when there is not enough information.</p>
+      <div className="ask-input-wrap"><input autoFocus className="text-input" value={question} onChange={(e) => setQuestion(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') submit(); }} placeholder="Write your question" maxLength={500} data-testid="input-ask-notice-page" /><button className="btn btn-primary" onClick={() => submit()} disabled={!question.trim() || ask.isPending} data-testid="button-ask-notice-page">{ask.isPending ? <LoaderCircle size={15} className="spin" /> : <>Ask <ArrowRight size={15} /></>}</button></div>
+      <div className="suggestions">{suggestions.map((suggestion) => <button className="suggestion" key={suggestion} onClick={() => submit(suggestion)} data-testid={`button-ask-suggestion-${suggestion.slice(0, 10).replaceAll(' ', '-').toLowerCase()}`}>{suggestion}</button>)}</div>
+      {ask.isError && <div className="answer" data-testid="answer-notice-error">I don't have enough information in this notice and the NoticeLens Knowledge Base to answer that reliably.</div>}
+      {ask.data && <div className="answer" data-testid="answer-notice"><b>{ask.data.answer}</b></div>}
+      <div className="grounding"><ShieldCheck size={12} /> Grounded in this notice + the NoticeLens Knowledge Base</div>
+    </section>
+  </main>;
 }
 
 function NoticePage() {
@@ -246,7 +276,11 @@ function NoticePage() {
   if (isLoading) return <LoadingState label="Opening your notice" />;
   if (isError || !detail) return <div className="page"><ErrorState retry={() => void refetch()} /></div>;
   const analysis = detail.analysis;
-  return <main className="page" data-testid={`page-notice-${id}`}><div className="detail-head"><div><div className="eyebrow"><TaxBadge system={detail.taxSystem} /> <span style={{ marginLeft: 7 }}>{detail.isDemo ? 'Fictional example' : 'Private notice'}</span></div><h1 className="detail-title">{detail.title}</h1><div className="notice-meta">{detail.fileName} · Added {new Date(detail.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' })}</div></div><div className="detail-actions"><button className="btn btn-quiet" onClick={() => setLocation('/history')} data-testid="button-back-history"><ArrowLeft size={14} /> Back</button><button className="btn btn-secondary" onClick={() => window.print()} data-testid="button-print-notice"><FileText size={14} /> Save brief</button></div></div>{analysis ? <><div className="alert-deadline" data-testid="alert-notice-deadline"><Clock3 size={28} /><div><strong>Response deadline</strong><p>Keep this date visible before you plan your next step.</p></div><div className="deadline-date">{analysis.extracted.deadline || detail.deadline || 'Not found in the notice.'}</div></div><div className="analysis-grid"><div>{analysis.sections.map((section) => <section className={`card analysis-section tone-${section.tone}`} key={section.key} data-testid={`section-analysis-${section.key}`}><div className="eyebrow">{section.key.replaceAll('-', ' ')}</div><h2>{section.title}</h2><p>{section.body}</p>{section.bullets?.length ? <ul className="bullet-list">{section.bullets.map((bullet) => <li key={bullet}>{bullet}</li>)}</ul> : null}</section>)}<AskCard noticeId={id} /></div><div><ExtractedCard detail={detail} /><div className="card terms-card" data-testid="card-terms"><h2>Terms, in plain language</h2>{analysis.terms.map((term) => <div className="term" key={term.term}><strong>{term.term}</strong><p>{term.explanation}</p></div>)}</div></div></div></> : <div className="card empty"><div className="empty-icon"><Info size={20} /></div><h3>Analysis is not ready yet</h3><p>This notice is saved. Return shortly to see its structured brief.</p><Link href={`/processing?noticeId=${id}`} className="btn btn-primary" data-testid="button-analyze-notice"><Sparkles size={15} /> Analyse notice</Link></div>}</main>;
+  return <main className="page" data-testid={`page-notice-${id}`}>
+    <div className="crumb-row"><Link href="/history" className="crumb-link"><ArrowLeft size={13} /> My notices</Link><span className="mono-note">CASE FILE / {String(id).padStart(4, '0')}</span></div>
+    <header className="detail-head"><div><div className="notice-kinds"><TaxBadge system={detail.taxSystem} /><span className="notice-privacy"><span className="status-dot" />{detail.isDemo ? 'DEMO — FICTIONAL DATA' : 'Private notice'}</span></div><h1 className="detail-title">{detail.title}</h1><div className="notice-meta">{detail.fileName} · Added {new Date(detail.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' })}</div></div><div className="detail-actions"><button className="btn btn-quiet" onClick={() => setLocation('/history')} data-testid="button-back-history"><ArrowLeft size={14} /> Back</button><button className="btn btn-secondary" onClick={() => window.print()} data-testid="button-print-notice"><FileText size={14} /> Save brief</button></div></header>
+    {analysis ? <><div className="alert-deadline" data-testid="alert-notice-deadline"><div className="deadline-icon"><Clock3 size={20} /></div><div><div className="eyebrow">Important date</div><strong>Response deadline</strong><p>Keep this date visible before you plan your next step.</p></div><div className="deadline-date">{analysis.extracted.deadline || detail.deadline || 'Not found in the notice.'}</div></div><div className="analysis-grid"><div className="analysis-main"><div className="column-heading"><span className="eyebrow">01 / Notice brief</span><span className="mono-note">READING LAYER</span></div>{analysis.sections.map((section, index) => <section className={`card analysis-section tone-${section.tone}`} key={section.key} data-testid={`section-analysis-${section.key}`}><div className="section-meta"><span className="section-number">{String(index + 1).padStart(2, '0')}</span><span className="eyebrow">{section.key.replaceAll('-', ' ')}</span></div><h2>{section.title}</h2><p>{section.body}</p>{section.bullets?.length ? <ul className="bullet-list">{section.bullets.map((bullet) => <li key={bullet}>{bullet}</li>)}</ul> : null}</section>)}<AskCard noticeId={id} /></div><aside className="analysis-side"><div className="column-heading"><span className="eyebrow">02 / Evidence</span><span className="mono-note">SOURCE</span></div><ExtractedCard detail={detail} /><div className="card terms-card" data-testid="card-terms"><div className="panel-heading"><div><div className="eyebrow">Reference / translated</div><h2>Terms, in plain language</h2></div><span className="panel-index">03</span></div>{analysis.terms.map((term) => <div className="term" key={term.term}><strong>{term.term}</strong><p>{term.explanation}</p></div>)}</div></aside></div></> : <div className="card empty"><div className="empty-icon"><Info size={20} /></div><h3>Analysis is not ready yet</h3><p>This notice is saved. Return shortly to see its structured brief.</p><Link href={`/processing?noticeId=${id}`} className="btn btn-primary" data-testid="button-analyze-notice"><Sparkles size={15} /> Analyse notice</Link></div>}
+  </main>;
 }
 
 function HistoryPage() {
@@ -258,7 +292,11 @@ function HistoryPage() {
   if (isError) return <div className="page"><ErrorState retry={() => void refetch()} /></div>;
   const filtered = (notices ?? []).filter((notice) => `${notice.title} ${notice.fileName} ${notice.noticeType ?? ''}`.toLowerCase().includes(search.toLowerCase()));
   const remove = (id: number) => { if (window.confirm('Delete this saved notice? This cannot be undone.')) deleteNotice.mutate({ noticeId: id }, { onSuccess: () => { queryClient.invalidateQueries({ queryKey: getListNoticesQueryKey() }); queryClient.invalidateQueries({ queryKey: getGetDashboardQueryKey() }); } }); };
-  return <main className="page" data-testid="page-history"><div className="page-head"><div><div className="eyebrow">Private archive</div><h1 className="page-title">Your notices.</h1><p className="page-copy">Everything you have uploaded, kept in one place. Reopen a brief or remove a document when you no longer need it.</p></div><Link href="/upload" className="btn btn-primary" data-testid="button-history-upload"><Plus size={15} /> Upload notice</Link></div><div className="history-toolbar"><div style={{ position: 'relative', flex: 1 }}><Search size={15} color="var(--muted)" style={{ position: 'absolute', left: 12, top: 12 }} /><input className="text-input" style={{ paddingLeft: 35 }} placeholder="Search your notices" value={search} onChange={(e) => setSearch(e.target.value)} data-testid="input-search-notices" /></div><span className="eyebrow">{filtered.length} saved</span></div>{filtered.length ? <div className="notice-list">{filtered.map((notice) => <NoticeRow key={notice.id} notice={notice} onDelete={remove} />)}</div> : <div className="card empty" data-testid="empty-history"><div className="empty-icon"><History size={20} /></div><h3>{search ? 'No notices match that search' : 'Your archive is empty'}</h3><p>{search ? 'Try a different title or file name.' : 'Upload your first notice to create a clear, private brief.'}</p>{!search && <Link href="/upload" className="btn btn-primary" data-testid="button-empty-history-upload"><UploadCloud size={15} /> Upload a notice</Link>}</div>}</main>;
+  return <main className="page" data-testid="page-history">
+    <div className="page-head"><div><div className="eyebrow">Private archive</div><h1 className="page-title">Your notices.</h1><p className="page-copy">Everything you have uploaded, kept in one place. Reopen a brief or remove a document when you no longer need it.</p></div><Link href="/upload" className="btn btn-primary" data-testid="button-history-upload"><Plus size={15} /> Upload notice</Link></div>
+    <div className="history-toolbar"><div className="search-field"><Search size={15} aria-hidden="true" /><input className="text-input" placeholder="Search your notices" value={search} onChange={(e) => setSearch(e.target.value)} data-testid="input-search-notices" /></div><span className="eyebrow">{filtered.length} saved</span></div>
+    {filtered.length ? <div className="notice-list"><div className="list-labels"><span>Notice</span><span>System</span><span>Status</span><span aria-hidden="true" /></div>{filtered.map((notice) => <NoticeRow key={notice.id} notice={notice} onDelete={remove} />)}</div> : <div className="card empty" data-testid="empty-history"><div className="empty-icon"><History size={20} /></div><h3>{search ? 'No notices match that search' : 'Your archive is empty'}</h3><p>{search ? 'Try a different title or file name.' : 'Upload your first notice to create a clear, private brief.'}</p>{!search && <Link href="/upload" className="btn btn-primary" data-testid="button-empty-history-upload"><UploadCloud size={15} /> Upload a notice</Link>}</div>}
+  </main>;
 }
 
 function DemoPage() {
@@ -270,7 +308,7 @@ function DemoPage() {
     { tax: 'INCOME_TAX' as const, label: 'Income Tax 142(1)', title: 'Income Tax information request', desc: 'A fictional request for supporting documents during assessment proceedings.', content: 'DEMO — FICTIONAL DATA. Income Tax Department notice under section 142(1) for Assessment Year 2024-25. Reference no.: IT/DEMO/2024/003. Reply by 20/08/2024. The taxpayer is asked to upload bank statements, salary or income reconciliation, and deduction evidence through the e-Proceedings portal.' },
   ];
   const openDemo = (demo: typeof demos[number]) => createNotice.mutate({ data: { title: demo.title, fileName: `${demo.label.toLowerCase().replaceAll(' ', '-')}.txt`, fileType: 'text/plain', taxSystem: demo.tax, content: demo.content, isDemo: true } }, { onSuccess: (notice) => { localStorage.setItem(`notice-content-${notice.id}`, demo.content); setLocation(`/processing?noticeId=${notice.id}`); } });
-  return <main className="page" data-testid="page-demo"><div className="page-head"><div><div className="eyebrow">Step 00 / Explore NoticeLens</div><h1 className="page-title">Choose a fictional<br /><span className="serif">notice to explore.</span></h1><p className="page-copy">These examples are invented for demonstration. They are not tax advice and have no legal effect.</p></div><Link href="/" className="btn btn-quiet" data-testid="button-back-demo"><ArrowLeft size={15} /> Back</Link></div><div className="demo-grid">{demos.map((demo, index) => <article className="card demo-card" key={demo.label} data-testid={`card-demo-${index}`}><div className="demo-tag">{demo.label} · Fictional</div><h2>{demo.title}</h2><p>{demo.desc}</p><button className="btn btn-secondary" onClick={() => openDemo(demo)} disabled={createNotice.isPending} data-testid={`button-open-demo-${index}`}>Explore this notice <ArrowRight size={14} /></button></article>)}</div></main>;
+  return <main className="page" data-testid="page-demo"><div className="page-head"><div><div className="eyebrow">Step 00 / Explore NoticeLens</div><h1 className="page-title">Choose a fictional<br /><span className="serif">notice to explore.</span></h1><p className="page-copy">These examples are invented for demonstration. They are not tax advice and have no legal effect.</p></div><Link href="/" className="btn btn-quiet" data-testid="button-back-demo"><ArrowLeft size={15} /> Back</Link></div><div className="demo-intro"><span className="eyebrow">Three reference cases</span><span className="mono-note">FICTIONAL DATA / SAFE TO EXPLORE</span></div><div className="demo-grid">{demos.map((demo, index) => <article className="card demo-card" key={demo.label} data-testid={`card-demo-${index}`}><div className="demo-card-index">0{index + 1}</div><div className="demo-tag">{demo.label} · Fictional</div><h2>{demo.title}</h2><p>{demo.desc}</p><button className="btn btn-secondary" onClick={() => openDemo(demo)} disabled={createNotice.isPending} data-testid={`button-open-demo-${index}`}>Explore this notice <ArrowRight size={14} /></button></article>)}</div></main>;
 }
 
 function KnowledgePage() {
@@ -280,7 +318,7 @@ function KnowledgePage() {
     ['03 / Answers', 'A grounded conversation', 'Ask My Notice can answer questions about your document when the notice and reference library contain enough information. Otherwise it says: “I don’t have enough information in this notice and the NoticeLens Knowledge Base to answer that reliably.”'],
     ['04 / Boundaries', 'A reading layer, not representation', 'NoticeLens helps you understand what a notice says and what it asks for. It is not a lawyer, tax practitioner, or substitute for professional advice.'],
   ];
-  return <main className="page" data-testid="page-knowledge-base"><div className="page-head"><div><div className="eyebrow">The NoticeLens method</div><h1 className="page-title">A small library<br /><span className="serif">with firm edges.</span></h1><p className="page-copy">Good explanations begin with knowing what you can and cannot claim. This is the reference layer behind every NoticeLens brief.</p></div></div><div className="kb-grid"><aside className="card kb-intro"><ShieldCheck size={23} color="#f0c99e" /><h2>Grounded,<br />not generic.</h2><p>The supplied knowledge base is deterministic. That makes our language narrower, but much more trustworthy when a notice is stressful and time is short.</p><div className="quiet-rule" style={{ background: 'rgba(255,255,255,.18)' }} /><div className="eyebrow" style={{ color: '#a8c4b9' }}>Reference library</div></aside><section className="card kb-list">{entries.map(([number, title, body]) => <article className="kb-item" key={number} data-testid={`kb-entry-${number.slice(0, 2)}`}><div className="eyebrow">{number}</div><h3>{title}</h3><p>{body}</p></article>)}</section></div></main>;
+  return <main className="page" data-testid="page-knowledge-base"><div className="page-head"><div><div className="eyebrow">The NoticeLens method</div><h1 className="page-title">A small library<br /><span className="serif">with firm edges.</span></h1><p className="page-copy">Good explanations begin with knowing what you can and cannot claim. This is the reference layer behind every NoticeLens brief.</p></div></div><div className="kb-grid"><aside className="kb-intro"><div className="kb-intro-mark"><ShieldCheck size={23} /></div><div className="eyebrow">Reference layer</div><h2>Grounded,<br />not generic.</h2><p>The supplied knowledge base is deterministic. That makes our language narrower, but much more trustworthy when a notice is stressful and time is short.</p><div className="quiet-rule" /><div className="eyebrow">Reference library</div></aside><section className="card kb-list"><div className="list-labels"><span>Principle</span><span>What it means</span></div>{entries.map(([number, title, body]) => <article className="kb-item" key={number} data-testid={`kb-entry-${number.slice(0, 2)}`}><div className="kb-item-number">{number}</div><div><h3>{title}</h3><p>{body}</p></div></article>)}</section></div></main>;
 }
 
 function PricingPage() {
