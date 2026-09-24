@@ -8,6 +8,27 @@ NoticeLens is a grounded workspace for Indian GST and Income Tax notices. It hel
 
 Tax notices are often difficult to interpret quickly, especially when the recipient does not have immediate access to a Chartered Accountant or tax lawyer. NoticeLens reduces confusion without pretending to replace professional advice. It extracts practical facts from a notice, explains supported terms in plain language, and clearly indicates when the available information is not enough.
 
+
+## Run locally
+
+Requirements: Node.js 22+, pnpm, and PostgreSQL.
+
+```bash
+pnpm install
+cp .env.example .env
+# Set DATABASE_URL in .env, then:
+pnpm --filter @workspace/db run push
+```
+
+Start the API and frontend in separate terminals:
+
+```bash
+PORT=5000 pnpm --filter @workspace/api-server run dev
+PORT=4173 BASE_PATH=/ pnpm --filter @workspace/notice-lens run dev
+```
+
+Open `http://localhost:4173`. The frontend development server proxies `/api` requests to the API on port 5000.
+
 ## Core experience
 
 1. Upload a PDF, JPG, JPEG, or PNG notice and select GST, Income Tax, or Not Sure.
