@@ -27,7 +27,6 @@ For a fast review, open the Demo page and choose one of the three entries marked
 4. Ask a question in Ask My Notice.
 5. Confirm that the answer is grounded in the current notice and knowledge base.
 6. Open History to show the private archive.
-Use fictional demos for recordings unless you have explicit permission to show a real document. Never include real PAN, Aadhaar, bank, address, or tax identifiers in a public demo.
 
 ## Safety boundary
 
