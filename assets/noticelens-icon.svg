@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" role="img" aria-label="NoticeLens app icon">
+  <rect width="1024" height="1024" rx="224" fill="#123F45"/>
+  <rect x="184" y="144" width="656" height="736" rx="92" fill="#FFFDF9"/>
+  <path d="M304 304h416M304 432h304M304 560h416M304 688h232" fill="none" stroke="#123F45" stroke-width="48" stroke-linecap="round"/>
+  <circle cx="752" cy="688" r="84" fill="#C9785F"/>
+  <path d="m716 688 26 26 48-58" fill="none" stroke="#FFFDF9" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
