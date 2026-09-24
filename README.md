@@ -52,16 +52,16 @@ VITE_REVENUECAT_PUBLIC_KEY=your_public_revenuecat_web_key
 Start the API server in one terminal:
 
 ```bash
-pnpm --filter @workspace/api-server run dev
+PORT=5000 pnpm --filter @workspace/api-server run dev
 ```
 
 Start the frontend in another terminal:
 
 ```bash
-pnpm --filter @workspace/notice-lens run dev
+PORT=4173 BASE_PATH=/ pnpm --filter @workspace/notice-lens run dev
 ```
 
-The managed Replit workflow supplies `PORT` and `BASE_PATH` when configured. The API server requires a reachable PostgreSQL database before it can start.
+The managed Replit workflow supplies `PORT` and `BASE_PATH` when configured. For a local run, use the explicit values above. The API server requires a reachable PostgreSQL database before it can start.
 
 ## Demo path
 
@@ -87,27 +87,13 @@ RevenueCat is used for the NoticeLens Plus purchase and restore flow. The browse
 
 The app does not hardcode or invent a price; the displayed price is served by the current RevenueCat offering. The repository preserves loading, purchase, restore, entitlement, success, and error states for the integration.
 
+## Replit run troubleshooting
+
+The Replit Run button starts the project workflow, but the API server must have a PostgreSQL database connection. If clicking Run appears to do nothing or the console reports `DATABASE_URL must be set`, provision a Replit PostgreSQL database and make sure the resulting `DATABASE_URL` is available in the project's environment variables. Then restart the workflow. The frontend can render public pages without the API, but upload, history, demos, analysis, and Ask My Notice require the API and database to be running.
+
 ## Safety boundary
 
 NoticeLens provides educational and informational assistance based on the uploaded document and referenced tax information. It does not replace advice from a qualified Chartered Accountant, tax professional, or lawyer. When the available information is insufficient, the app says so instead of guessing.
-
-## Shipaton Next Gen submission
-
-NoticeLens is prepared for the Next Gen submission format with a public source repository, an MIT open-source license, documented setup instructions, fictional demo data, and a working product walkthrough. The submission should include:
-
-- A publicly accessible demo video shorter than two minutes on YouTube or Vimeo.
-- This public repository URL.
-- A clear description of what NoticeLens does and why it matters.
-- A 1024 × 1024 app icon and portrait screenshot assets in `assets/` and `screenshots/`.
-- Student eligibility and guardian consent information on Devpost when applicable.
-
-The intended submission positioning is **Next Gen Award**, with a secondary social-impact story: helping ordinary taxpayers and small businesses understand intimidating notices and identify their next safe step.
-
-## Submission assets
-
-- App icon source: `assets/noticelens-icon.svg`
-- App icon PNG: `assets/noticelens-icon-1024.png`
-- Portrait product screenshot: `screenshots/noticelens-knowledge-base-1179x2556.png`
 
 ## License
 
