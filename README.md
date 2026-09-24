@@ -26,43 +26,6 @@ NoticeLens does not send uploaded notices to OpenAI, Gemini, Claude, or another 
 
 The repository contains a React/Vite frontend, an Express API server, shared workspace packages, deterministic document extraction, PostgreSQL models, and RevenueCat Web SDK integration. The analysis page separates the notice brief, evidence/extracted facts, plain-language terms, and grounded questions so the user can see what the product knows and what it does not claim.
 
-## Run locally
-
-### Prerequisites
-
-- Node.js 22 or compatible Node.js runtime
-- pnpm
-- PostgreSQL database
-- A `DATABASE_URL` environment variable
-- Optional RevenueCat Test Store configuration through `VITE_REVENUECAT_PUBLIC_KEY`
-
-Install dependencies:
-
-```bash
-pnpm install
-```
-
-Set the required environment values using your local environment or Replit Secrets. Do not commit secrets:
-
-```bash
-DATABASE_URL=postgresql://USER:PASSWORD@HOST:5432/DATABASE
-VITE_REVENUECAT_PUBLIC_KEY=your_public_revenuecat_web_key
-```
-
-Start the API server in one terminal:
-
-```bash
-PORT=5000 pnpm --filter @workspace/api-server run dev
-```
-
-Start the frontend in another terminal:
-
-```bash
-PORT=4173 BASE_PATH=/ pnpm --filter @workspace/notice-lens run dev
-```
-
-The managed Replit workflow supplies `PORT` and `BASE_PATH` when configured. For a local run, use the explicit values above. The API server requires a reachable PostgreSQL database before it can start.
-
 ## Demo path
 
 For a fast review, open the Demo page and choose one of the three entries marked **DEMO — FICTIONAL DATA**. A strong walkthrough is:
@@ -86,10 +49,6 @@ RevenueCat is used for the NoticeLens Plus purchase and restore flow. The browse
 - Product: `notice_lens_plus_monthly`
 
 The app does not hardcode or invent a price; the displayed price is served by the current RevenueCat offering. The repository preserves loading, purchase, restore, entitlement, success, and error states for the integration.
-
-## Replit run troubleshooting
-
-The Replit Run button starts the project workflow, but the API server must have a PostgreSQL database connection. If clicking Run appears to do nothing or the console reports `DATABASE_URL must be set`, provision a Replit PostgreSQL database and make sure the resulting `DATABASE_URL` is available in the project's environment variables. Then restart the workflow. The frontend can render public pages without the API, but upload, history, demos, analysis, and Ask My Notice require the API and database to be running.
 
 ## Safety boundary
 
