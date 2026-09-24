@@ -16,13 +16,6 @@ Tax notices are often difficult to interpret quickly, especially when the recipi
 4. Ask My Notice answers questions using only the current notice and the supplied NoticeLens knowledge base.
 5. Fictional demo notices provide a fast way to review the experience without uploading a personal document.
 6. Private cookie-scoped history lets users reopen and delete saved notices.
-7. NoticeLens Plus uses RevenueCat Test Store for the purchase and restore flow.
-
-## What is technically distinctive
-
-NoticeLens does not send uploaded notices to OpenAI, Gemini, Claude, or another live LLM. Notice facts are extracted with deterministic rules, and explanations come from the versioned NoticeLens knowledge base. This makes the product narrower, but easier to explain and safer to demonstrate: the app does not invent an answer when the available notice information is insufficient.
-
-The repository contains a React/Vite frontend, an Express API server, shared workspace packages, deterministic document extraction, PostgreSQL models, and RevenueCat Web SDK integration. The analysis page separates the notice brief, evidence/extracted facts, plain-language terms, and grounded questions so the user can see what the product knows and what it does not claim.
 
 ## Demo path
 
@@ -34,19 +27,7 @@ For a fast review, open the Demo page and choose one of the three entries marked
 4. Ask a question in Ask My Notice.
 5. Confirm that the answer is grounded in the current notice and knowledge base.
 6. Open History to show the private archive.
-7. Open Pricing to review the RevenueCat-powered Plus flow.
-
 Use fictional demos for recordings unless you have explicit permission to show a real document. Never include real PAN, Aadhaar, bank, address, or tax identifiers in a public demo.
-
-## RevenueCat configuration
-
-RevenueCat is used for the NoticeLens Plus purchase and restore flow. The browser reads the public key from `VITE_REVENUECAT_PUBLIC_KEY`.
-
-- Entitlement: `notice_lens_plus`
-- Offering: `default`
-- Product: `notice_lens_plus_monthly`
-
-The app does not hardcode or invent a price; the displayed price is served by the current RevenueCat offering. The repository preserves loading, purchase, restore, entitlement, success, and error states for the integration.
 
 ## Safety boundary
 
