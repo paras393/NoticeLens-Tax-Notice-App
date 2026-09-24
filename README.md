@@ -1,7 +1,5 @@
 # NoticeLens
 
-# NoticeLens
-
 **Understand your notice. Know your next step.**
 
 NoticeLens is a grounded workspace for Indian GST and Income Tax notices. It helps taxpayers, freelancers, and small businesses move from an intimidating government document to a clear explanation of what the notice says, what action it requests, and which date matters next.
