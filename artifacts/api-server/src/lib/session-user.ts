@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 import { eq } from "drizzle-orm";
-import { db, usersTable } from "@workspace/db";
+import { db, isLocalDatabase, localDb, usersTable } from "@workspace/db";
 
 const COOKIE_NAME = "notice_lens_user";
 
@@ -15,6 +15,10 @@ export async function getCurrentUser(req: Request, res: Response) {
       signed: true,
       maxAge: 1000 * 60 * 60 * 24 * 365,
     });
+  }
+
+  if (isLocalDatabase) {
+    return localDb.getUserBySessionKey(sessionKey) ?? localDb.createUser(sessionKey);
   }
 
   const existing = await db

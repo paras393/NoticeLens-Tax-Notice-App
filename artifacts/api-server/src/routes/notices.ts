@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { and, desc, eq } from "drizzle-orm";
-import { db, analysesTable, noticesTable } from "@workspace/db";
+import { db, analysesTable, isLocalDatabase, localDb, noticesTable } from "@workspace/db";
 import {
   AnalyzeNoticeBody,
   AnalyzeNoticeParams,
@@ -46,6 +46,7 @@ function formatAnalysis(analysis: typeof analysesTable.$inferSelect) {
 }
 
 async function getOwnedNotice(userId: number, noticeId: number) {
+  if (isLocalDatabase) return localDb.getNotice(userId, noticeId);
   const [notice] = await db
     .select()
     .from(noticesTable)
@@ -56,6 +57,10 @@ async function getOwnedNotice(userId: number, noticeId: number) {
 
 router.get("/notices", async (req, res): Promise<void> => {
   const user = await getCurrentUser(req, res);
+  if (isLocalDatabase) {
+    res.json(ListNoticesResponse.parse(localDb.listNotices(user.id).map(formatNotice)));
+    return;
+  }
   const notices = await db
     .select()
     .from(noticesTable)
@@ -71,6 +76,11 @@ router.post("/notices", async (req, res): Promise<void> => {
     return;
   }
   const user = await getCurrentUser(req, res);
+  if (isLocalDatabase) {
+    const notice = localDb.createNotice({ ...parsed.data, userId: user.id });
+    res.status(201).json(CreateNoticeResponse.parse(formatNotice(notice)));
+    return;
+  }
   const [notice] = await db
     .insert(noticesTable)
     .values({
@@ -98,6 +108,16 @@ router.get("/notices/:noticeId", async (req, res): Promise<void> => {
     res.status(404).json({ error: "Notice not found" });
     return;
   }
+  if (isLocalDatabase) {
+    const analysis = localDb.getAnalysis(notice.id);
+    res.json(
+      GetNoticeResponse.parse({
+        ...formatNotice(notice),
+        analysis: analysis ? formatAnalysis(analysis) : null,
+      }),
+    );
+    return;
+  }
   const [analysis] = await db
     .select()
     .from(analysesTable)
@@ -118,6 +138,14 @@ router.delete("/notices/:noticeId", async (req, res): Promise<void> => {
     return;
   }
   const user = await getCurrentUser(req, res);
+  if (isLocalDatabase) {
+    if (!localDb.deleteNotice(user.id, params.data.noticeId)) {
+      res.status(404).json({ error: "Notice not found" });
+      return;
+    }
+    res.sendStatus(204);
+    return;
+  }
   const deleted = await db
     .delete(noticesTable)
     .where(and(eq(noticesTable.id, params.data.noticeId), eq(noticesTable.userId, user.id)))
@@ -150,6 +178,16 @@ router.post("/notices/:noticeId/analyze", async (req, res): Promise<void> => {
   const content = body.data.content ?? notice.content;
   const taxSystem = body.data.taxSystem ?? notice.taxSystem;
   const payload = analyzeNoticeContent(content, taxSystem);
+  if (isLocalDatabase) {
+    const analysis = localDb.saveAnalysis(notice.id, payload);
+    localDb.updateNotice(notice.id, {
+      status: "analyzed",
+      noticeType: payload.noticeType,
+      deadline: payload.extracted.deadline,
+    });
+    res.json(AnalyzeNoticeResponse.parse(formatAnalysis(analysis)));
+    return;
+  }
   const [analysis] = await db
     .insert(analysesTable)
     .values({ noticeId: notice.id, payload })
@@ -191,11 +229,13 @@ router.post("/notices/:noticeId/ask", async (req, res): Promise<void> => {
     res.status(404).json({ error: "Notice not found" });
     return;
   }
-  const [analysis] = await db
-    .select()
-    .from(analysesTable)
-    .where(eq(analysesTable.noticeId, notice.id))
-    .limit(1);
+  const analysis = isLocalDatabase
+    ? localDb.getAnalysis(notice.id)
+    : (await db
+        .select()
+        .from(analysesTable)
+        .where(eq(analysesTable.noticeId, notice.id))
+        .limit(1))[0];
   const payload = analysis?.payload ?? analyzeNoticeContent(notice.content, notice.taxSystem);
   const result = answerNoticeQuestion(
     body.data.question,
@@ -214,11 +254,13 @@ router.post("/notices/:noticeId/ask", async (req, res): Promise<void> => {
 
 router.get("/dashboard", async (req, res): Promise<void> => {
   const user = await getCurrentUser(req, res);
-  const notices = await db
-    .select()
-    .from(noticesTable)
-    .where(eq(noticesTable.userId, user.id))
-    .orderBy(desc(noticesTable.createdAt));
+  const notices: Array<typeof noticesTable.$inferSelect> = isLocalDatabase
+    ? localDb.listNotices(user.id)
+    : await db
+        .select()
+        .from(noticesTable)
+        .where(eq(noticesTable.userId, user.id))
+        .orderBy(desc(noticesTable.createdAt));
   res.json(
     GetDashboardResponse.parse({
       totalNotices: notices.length,

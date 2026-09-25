@@ -11,13 +11,11 @@ Tax notices are often difficult to interpret quickly, especially when the recipi
 
 ## Run locally
 
-Requirements: Node.js 22+, pnpm, and PostgreSQL.
+Requirements: Node.js 22+ and pnpm. Local mode uses in-memory storage; data resets when the API process stops.
 
 ```bash
 pnpm install
 cp .env.example .env
-# Set DATABASE_URL in .env, then:
-pnpm --filter @workspace/db run push
 ```
 
 Start the API and frontend in separate terminals:
@@ -56,3 +54,5 @@ NoticeLens provides educational and informational assistance based on the upload
 ## License
 
 This project is open source under the [MIT License](LICENSE).
+
+For persistent deployment storage, set `DATABASE_URL` and remove `NOTICE_LENS_DB=memory` from the environment before starting the API. PostgreSQL mode remains available for deployed environments.
