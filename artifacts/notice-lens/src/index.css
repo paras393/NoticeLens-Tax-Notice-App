@@ -286,6 +286,18 @@ button:focus-visible, a:focus-visible, input:focus-visible {
 .evidence-source { display: flex; align-items: center; gap: 6px; color: var(--muted); font: 9px var(--app-font-mono); text-transform: uppercase; letter-spacing: .05em; }
 .evidence-source .status-dot { width: 5px; height: 5px; background: var(--teal); }
 .evidence-empty { color: var(--muted); font-size: 11px; line-height: 1.5; padding-top: 9px; }
+.officer-message-card { padding: 23px; margin-bottom: 12px; border-color: #D7C4B3; background: #FFF9F2; }
+.officer-message-top { display: flex; align-items: center; gap: 10px; }
+.officer-message-top h2 { margin: 5px 0 0; font-size: 16px; letter-spacing: -.03em; }
+.officer-message-top .panel-index { margin-left: auto; color: var(--copper); font: 10px var(--app-font-mono); letter-spacing: .06em; }
+.officer-message-copy { color: var(--ink-soft); font-size: 12px; line-height: 1.55; margin: 16px 0; }
+.officer-message-lock { display: flex; align-items: center; gap: 8px; padding-top: 13px; border-top: 1px solid #E8D9CC; color: var(--muted); font-size: 11px; }
+.officer-message-lock svg { color: var(--copper); flex: none; }
+.officer-message-lock .btn { margin-left: auto; white-space: nowrap; }
+.officer-draft { margin-top: 14px; padding-top: 14px; border-top: 1px solid #E8D9CC; }
+.officer-draft textarea { min-height: 185px; resize: vertical; line-height: 1.55; font-size: 12px; }
+.officer-draft > .btn { margin-top: 9px; }
+.rotate-icon { transform: rotate(90deg); }
 .terms-card { padding: 23px; }
 .terms-card h2 { margin: 7px 0 0; font-size: 16px; }
 .term { border-top: 1px solid var(--line); padding: 13px 0; }
