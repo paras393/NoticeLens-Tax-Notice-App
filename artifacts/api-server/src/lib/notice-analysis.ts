@@ -2,6 +2,7 @@ import type {
   AnalysisPayload,
   AnalysisSection,
   AnalysisTerm,
+  EvidenceItem,
   ExtractedNotice,
 } from "@workspace/db";
 import {
@@ -14,6 +15,44 @@ const NOT_FOUND = "Not found in the notice.";
 
 const clean = (value: string | undefined): string =>
   value?.trim().replace(/\s+/g, " ").replace(/[.,;:]+$/, "") || NOT_FOUND;
+
+function excerptFor(text: string, value: string): string | null {
+  if (!value || value === NOT_FOUND) return null;
+  const normalized = text.replace(/\r/g, "").replace(/\s+/g, " ").trim();
+  const start = normalized.toLowerCase().indexOf(value.toLowerCase());
+  if (start === -1) return null;
+  const sentenceStart = Math.max(
+    normalized.lastIndexOf(".", start),
+    normalized.lastIndexOf("!", start),
+    normalized.lastIndexOf("?", start),
+  );
+  const sentenceEndCandidates = [
+    normalized.indexOf(".", start + value.length),
+    normalized.indexOf("!", start + value.length),
+    normalized.indexOf("?", start + value.length),
+  ].filter((index) => index >= 0);
+  const sentenceEnd = sentenceEndCandidates.length
+    ? Math.min(...sentenceEndCandidates)
+    : Math.min(normalized.length, start + value.length + 140);
+  return normalized.slice(sentenceStart + 1, sentenceEnd + 1).trim();
+}
+
+function buildEvidence(text: string, extracted: ExtractedNotice): EvidenceItem[] {
+  const items: EvidenceItem[] = [];
+  const add = (field: string, label: string, value: string) => {
+    const excerpt = excerptFor(text, value);
+    if (excerpt) items.push({ field, label, value, excerpt, source: "Current notice" });
+  };
+
+  add("deadline", "Response deadline", extracted.deadline);
+  add("requestedAction", "Action requested", extracted.requestedAction);
+  add("referenceNumber", "Reference number", extracted.referenceNumber);
+  add("noticeDate", "Notice date", extracted.noticeDate);
+  add("section", "Section / rule", extracted.section);
+  for (const amount of extracted.amounts) add("amount", "Amount mentioned", amount);
+  for (const document of extracted.documents) add("document", "Document mentioned", document);
+  return items;
+}
 
 function firstMatch(text: string, patterns: RegExp[]): string {
   for (const pattern of patterns) {
@@ -245,6 +284,7 @@ export function analyzeNoticeContent(
     noticeType,
     confidence,
     extracted,
+    evidence: buildEvidence(content, extracted),
     sections: buildSections(noticeType, extracted, matched),
     terms: buildTerms(matched),
   };

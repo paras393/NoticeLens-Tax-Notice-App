@@ -265,6 +265,27 @@ button:focus-visible, a:focus-visible, input:focus-visible {
 .extract-item.important { padding: 10px; margin: -2px; border-radius: 5px; background: #FFF3EE; }
 .extract-item.important dd { color: var(--danger); font-weight: 600; }
 .evidence-values { color: var(--ink-soft); font: 12px var(--app-font-mono); line-height: 1.6; margin-top: 7px; overflow-wrap: anywhere; }
+.evidence-lens { margin: 0 0 22px; padding: 14px; border: 1px solid #C8DCD3; border-radius: 7px; background: #F3F8F3; }
+.evidence-lens-heading { display: flex; align-items: start; justify-content: space-between; gap: 12px; }
+.evidence-lens-heading h3 { margin: 5px 0 0; font-size: 14px; letter-spacing: -.025em; }
+.evidence-count { color: var(--teal); font: 10px var(--app-font-mono); white-space: nowrap; }
+.evidence-lens-intro { color: var(--ink-soft); font-size: 11px; line-height: 1.45; margin: 9px 0 12px; }
+.evidence-list { border-top: 1px solid #D5E4DC; }
+.evidence-item { border-bottom: 1px solid #D5E4DC; padding: 9px 0; }
+.evidence-item summary { display: flex; align-items: center; justify-content: space-between; gap: 8px; cursor: pointer; list-style: none; }
+.evidence-item summary::-webkit-details-marker { display: none; }
+.evidence-item summary > svg { color: var(--teal); transition: transform .18s ease; flex: none; }
+.evidence-item[open] summary > svg { transform: rotate(90deg); }
+.evidence-item summary span { min-width: 0; display: grid; gap: 3px; }
+.evidence-item summary b { color: var(--ink); font-size: 11px; }
+.evidence-item summary small { color: var(--teal); font: 10px var(--app-font-mono); overflow-wrap: anywhere; }
+.evidence-quote { display: flex; gap: 7px; margin: 9px 4px 7px; color: var(--ink-soft); }
+.evidence-quote svg { color: var(--copper); flex: none; margin-top: 2px; }
+.evidence-quote p { margin: 0; font-size: 11px; line-height: 1.55; }
+.evidence-quote mark { color: var(--petrol); background: #F3D8C8; border-radius: 2px; padding: 1px 2px; }
+.evidence-source { display: flex; align-items: center; gap: 6px; color: var(--muted); font: 9px var(--app-font-mono); text-transform: uppercase; letter-spacing: .05em; }
+.evidence-source .status-dot { width: 5px; height: 5px; background: var(--teal); }
+.evidence-empty { color: var(--muted); font-size: 11px; line-height: 1.5; padding-top: 9px; }
 .terms-card { padding: 23px; }
 .terms-card h2 { margin: 7px 0 0; font-size: 16px; }
 .term { border-top: 1px solid var(--line); padding: 13px 0; }

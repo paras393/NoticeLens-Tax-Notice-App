@@ -8,6 +8,7 @@
 import type { AnalysisConfidence } from './analysisConfidence';
 import type { AnalysisSection } from './analysisSection';
 import type { ExtractedNotice } from './extractedNotice';
+import type { EvidenceItem } from './evidenceItem';
 import type { Term } from './term';
 
 export interface Analysis {
@@ -16,6 +17,7 @@ export interface Analysis {
   noticeType: string;
   confidence: AnalysisConfidence;
   extracted: ExtractedNotice;
+  evidence: EvidenceItem[];
   sections: AnalysisSection[];
   terms: Term[];
   createdAt: string;

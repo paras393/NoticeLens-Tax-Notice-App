@@ -89,12 +89,21 @@ export interface Term {
   explanation: string;
 }
 
+export interface EvidenceItem {
+  field: string;
+  label: string;
+  value: string;
+  excerpt: string;
+  source: 'Current notice';
+}
+
 export interface Analysis {
   id: number;
   noticeId: number;
   noticeType: string;
   confidence: AnalysisConfidence;
   extracted: ExtractedNotice;
+  evidence: EvidenceItem[];
   sections: AnalysisSection[];
   terms: Term[];
   createdAt: string;
@@ -157,4 +166,3 @@ export interface Dashboard {
   incomeTaxNotices: number;
   recent: Notice[];
 }
-

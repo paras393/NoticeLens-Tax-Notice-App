@@ -54,10 +54,19 @@ export type AnalysisTerm = {
   explanation: string;
 };
 
+export type EvidenceItem = {
+  field: string;
+  label: string;
+  value: string;
+  excerpt: string;
+  source: "Current notice";
+};
+
 export type AnalysisPayload = {
   noticeType: string;
   confidence: "high" | "medium" | "limited";
   extracted: ExtractedNotice;
+  evidence: EvidenceItem[];
   sections: AnalysisSection[];
   terms: AnalysisTerm[];
 };

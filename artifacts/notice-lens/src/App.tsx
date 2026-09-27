@@ -5,7 +5,7 @@ import {
   AlertCircle, ArrowLeft, ArrowRight, BookOpen, Check, ChevronRight, CircleHelp,
   Clock3, FileCheck2, FileText, History, Home as HomeIcon, Info, LoaderCircle, LockKeyhole,
   Menu, MessageCircle, Plus, RefreshCcw, Search, ShieldCheck, Sparkles, Trash2,
-  UploadCloud, X, Zap,
+  UploadCloud, X, Zap, Quote,
 } from 'lucide-react';
 import { Link, Route, Switch, useLocation, useParams, Router as WouterRouter } from 'wouter';
 import {
@@ -13,7 +13,7 @@ import {
   useAskNotice, useAnalyzeNotice, useCreateNotice, useDeleteNotice, useGetDashboard,
   useGetNotice, useListNotices,
 } from '@workspace/api-client-react';
-import type { Notice, NoticeDetail } from '@workspace/api-client-react';
+import type { EvidenceItem, Notice, NoticeDetail } from '@workspace/api-client-react';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
@@ -227,11 +227,29 @@ function ProcessingPage() {
   return <main className="page" data-testid="page-processing"><div className="processing"><div className="processing-topline"><span className="eyebrow">Step 02 / Reading your notice</span><span className="mono-note">ANALYSIS IN PROGRESS</span></div><div className="processing-mark"><FileCheck2 size={32} /></div><h1>Finding the signal<br /><span className="serif">inside the paperwork.</span></h1><p>We’re looking for dates, amounts, sections and the exact action the department is asking for.</p><div className="processing-track-label"><span>Reading document</span><span>Careful pass</span></div><div className="progress-track"><div className="progress-bar" /></div><div className="processing-note">{analyze.isError ? 'Could not finish reading this document.' : 'This usually takes a few seconds · no legal conclusions are made'}</div>{analyze.isError && <button className="btn btn-secondary" style={{ marginTop: 20 }} onClick={() => analyze.reset()} data-testid="button-retry-analysis"><RefreshCcw size={14} /> Try again</button>}</div></main>;
 }
 
+function highlightEvidence(excerpt: string, value: string) {
+  const start = excerpt.toLowerCase().indexOf(value.toLowerCase());
+  if (start < 0) return excerpt;
+  return <>{excerpt.slice(0, start)}<mark>{excerpt.slice(start, start + value.length)}</mark>{excerpt.slice(start + value.length)}</>;
+}
+
+function EvidenceLens({ evidence }: { evidence: EvidenceItem[] }) {
+  return <section className="evidence-lens" data-testid="card-evidence-lens">
+    <div className="evidence-lens-heading"><div><div className="eyebrow">Evidence Lens</div><h3>Where did this come from?</h3></div><span className="evidence-count">{evidence.length} {evidence.length === 1 ? 'source' : 'sources'}</span></div>
+    <p className="evidence-lens-intro">Key facts are linked to the exact wording found in the current notice.</p>
+    {evidence.length ? <div className="evidence-list">{evidence.map((item, index) => <details className="evidence-item" key={`${item.field}-${item.value}-${index}`} open={index === 0}>
+      <summary><span><b>{item.label}</b><small>{item.value}</small></span><ChevronRight size={14} /></summary>
+      <div className="evidence-quote"><Quote size={14} /><p>{highlightEvidence(item.excerpt, item.value)}</p></div>
+      <div className="evidence-source"><span className="status-dot" />{item.source}</div>
+    </details>)}</div> : <div className="evidence-empty">No matching source sentence was found for the extracted fields.</div>}
+  </section>;
+}
+
 function ExtractedCard({ detail }: { detail: NoticeDetail }) {
   const extracted = detail.analysis?.extracted;
   if (!extracted) return null;
   const values = [['Department', extracted.department], ['Reference no.', extracted.referenceNumber], ['Notice date', extracted.noticeDate], ['Financial year', extracted.financialYear], ['Assessment year', extracted.assessmentYear], ['Tax period', extracted.taxPeriod], ['Section', extracted.section], ['Hearing date', extracted.hearingDate]];
-  return <section className="card extract-card" data-testid="card-extracted-details"><div className="panel-heading"><div><div className="eyebrow">Evidence / extracted</div><h2>What we found in the notice</h2></div><span className="panel-index">02</span></div><dl className="extract-grid">{values.map(([label, value]) => <div className="extract-item" key={label}><dt>{label}</dt><dd>{value || 'Not found in the notice.'}</dd></div>)}<div className="extract-item important"><dt>Deadline</dt><dd>{extracted.deadline || 'Not found in the notice.'}</dd></div><div className="extract-item important"><dt>Action requested</dt><dd>{extracted.requestedAction || 'Not found in the notice.'}</dd></div></dl>{extracted.amounts?.length > 0 && <><div className="quiet-rule" /><div className="eyebrow">Amounts mentioned</div><div className="evidence-values">{extracted.amounts.join(' · ')}</div></>}{extracted.documents?.length > 0 && <><div className="quiet-rule" /><div className="eyebrow">Documents to keep ready</div><ul className="bullet-list" style={{ marginBottom: 0 }}>{extracted.documents.map((document) => <li key={document}>{document}</li>)}</ul></>}</section>;
+  return <section className="card extract-card" data-testid="card-extracted-details"><div className="panel-heading"><div><div className="eyebrow">Evidence / extracted</div><h2>What we found in the notice</h2></div><span className="panel-index">02</span></div><EvidenceLens evidence={detail.analysis?.evidence ?? []} /><dl className="extract-grid">{values.map(([label, value]) => <div className="extract-item" key={label}><dt>{label}</dt><dd>{value || 'Not found in the notice.'}</dd></div>)}<div className="extract-item important"><dt>Deadline</dt><dd>{extracted.deadline || 'Not found in the notice.'}</dd></div><div className="extract-item important"><dt>Action requested</dt><dd>{extracted.requestedAction || 'Not found in the notice.'}</dd></div></dl>{extracted.amounts?.length > 0 && <><div className="quiet-rule" /><div className="eyebrow">Amounts mentioned</div><div className="evidence-values">{extracted.amounts.join(' · ')}</div></>}{extracted.documents?.length > 0 && <><div className="quiet-rule" /><div className="eyebrow">Documents to keep ready</div><ul className="bullet-list" style={{ marginBottom: 0 }}>{extracted.documents.map((document) => <li key={document}>{document}</li>)}</ul></>}</section>;
 }
 
 function AskCard({ noticeId }: { noticeId: number }) {

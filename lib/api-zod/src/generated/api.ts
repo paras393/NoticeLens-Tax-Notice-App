@@ -6,8 +6,6 @@
  * OpenAPI spec version: 0.1.0
  */
 import * as zod from 'zod';
-
-
 /**
  * Returns server health status
  * @summary Health check
@@ -15,8 +13,6 @@ import * as zod from 'zod';
 export const HealthCheckResponse = zod.object({
   "status": zod.string()
 })
-
-
 /**
  * @summary List the current user's notices
  */
@@ -33,13 +29,10 @@ export const ListNoticesResponseItem = zod.object({
   "createdAt": zod.string()
 })
 export const ListNoticesResponse = zod.array(ListNoticesResponseItem)
-
-
 /**
  * @summary Create a notice from an uploaded document
  */
 export const createNoticeBodyIsDemoDefault = false;
-
 export const CreateNoticeBody = zod.object({
   "title": zod.string(),
   "fileName": zod.string(),
@@ -48,7 +41,6 @@ export const CreateNoticeBody = zod.object({
   "content": zod.string(),
   "isDemo": zod.boolean().default(createNoticeBodyIsDemoDefault)
 })
-
 export const CreateNoticeResponse = zod.object({
   "id": zod.number().int(),
   "title": zod.string(),
@@ -62,17 +54,54 @@ export const CreateNoticeResponse = zod.object({
   "createdAt": zod.string()
 })
 
+const EvidenceItem = zod.object({
+  "field": zod.string(),
+  "label": zod.string(),
+  "value": zod.string(),
+  "excerpt": zod.string(),
+  "source": zod.literal('Current notice')
+});
+
+const AnalysisResponse = zod.object({
+  "id": zod.number().int(),
+  "noticeId": zod.number().int(),
+  "noticeType": zod.string(),
+  "confidence": zod.enum(['high', 'medium', 'limited']),
+  "extracted": zod.object({
+  "department": zod.string(),
+  "referenceNumber": zod.string(),
+  "noticeDate": zod.string(),
+  "financialYear": zod.string(),
+  "assessmentYear": zod.string(),
+  "taxPeriod": zod.string(),
+  "section": zod.string(),
+  "amounts": zod.array(zod.string()),
+  "deadline": zod.string(),
+  "hearingDate": zod.string(),
+  "requestedAction": zod.string(),
+  "documents": zod.array(zod.string())
+}),
+  "evidence": zod.array(EvidenceItem),
+  "sections": zod.array(zod.object({
+  "key": zod.string(),
+  "title": zod.string(),
+  "body": zod.string(),
+  "tone": zod.enum(['default', 'warning', 'action', 'muted']),
+  "bullets": zod.array(zod.string()).optional()
+})),
+  "terms": zod.array(zod.object({
+  "term": zod.string(),
+  "explanation": zod.string()
+})),
+  "createdAt": zod.string()
+});
 
 /**
  * @summary Get a private notice and analysis
  */
-
-
-
 export const GetNoticeParams = zod.object({
   "noticeId": zod.coerce.number().int().min(1)
 })
-
 export const GetNoticeResponse = zod.object({
   "id": zod.number().int(),
   "title": zod.string(),
@@ -85,128 +114,41 @@ export const GetNoticeResponse = zod.object({
   "isDemo": zod.boolean(),
   "createdAt": zod.string()
 }).and(zod.object({
-  "analysis": zod.union([zod.object({
-  "id": zod.number().int(),
-  "noticeId": zod.number().int(),
-  "noticeType": zod.string(),
-  "confidence": zod.enum(['high', 'medium', 'limited']),
-  "extracted": zod.object({
-  "department": zod.string(),
-  "referenceNumber": zod.string(),
-  "noticeDate": zod.string(),
-  "financialYear": zod.string(),
-  "assessmentYear": zod.string(),
-  "taxPeriod": zod.string(),
-  "section": zod.string(),
-  "amounts": zod.array(zod.string()),
-  "deadline": zod.string(),
-  "hearingDate": zod.string(),
-  "requestedAction": zod.string(),
-  "documents": zod.array(zod.string())
-}),
-  "sections": zod.array(zod.object({
-  "key": zod.string(),
-  "title": zod.string(),
-  "body": zod.string(),
-  "tone": zod.enum(['default', 'warning', 'action', 'muted']),
-  "bullets": zod.array(zod.string()).optional()
-})),
-  "terms": zod.array(zod.object({
-  "term": zod.string(),
-  "explanation": zod.string()
-})),
-  "createdAt": zod.string()
-}),zod.null()]).optional()
+  "analysis": zod.union([AnalysisResponse,zod.null()]).optional()
 }))
-
-
 /**
  * @summary Delete a private notice
  */
-
-
-
 export const DeleteNoticeParams = zod.object({
   "noticeId": zod.coerce.number().int().min(1)
 })
-
 export const DeleteNoticeResponse = zod.void()
-
-
 /**
  * @summary Deterministically analyze a notice
  */
-
-
-
 export const AnalyzeNoticeParams = zod.object({
   "noticeId": zod.coerce.number().int().min(1)
 })
-
 export const AnalyzeNoticeBody = zod.object({
   "content": zod.string().optional(),
   "taxSystem": zod.enum(['GST', 'INCOME_TAX', 'NOT_SURE']).optional()
 })
-
-export const AnalyzeNoticeResponse = zod.object({
-  "id": zod.number().int(),
-  "noticeId": zod.number().int(),
-  "noticeType": zod.string(),
-  "confidence": zod.enum(['high', 'medium', 'limited']),
-  "extracted": zod.object({
-  "department": zod.string(),
-  "referenceNumber": zod.string(),
-  "noticeDate": zod.string(),
-  "financialYear": zod.string(),
-  "assessmentYear": zod.string(),
-  "taxPeriod": zod.string(),
-  "section": zod.string(),
-  "amounts": zod.array(zod.string()),
-  "deadline": zod.string(),
-  "hearingDate": zod.string(),
-  "requestedAction": zod.string(),
-  "documents": zod.array(zod.string())
-}),
-  "sections": zod.array(zod.object({
-  "key": zod.string(),
-  "title": zod.string(),
-  "body": zod.string(),
-  "tone": zod.enum(['default', 'warning', 'action', 'muted']),
-  "bullets": zod.array(zod.string()).optional()
-})),
-  "terms": zod.array(zod.object({
-  "term": zod.string(),
-  "explanation": zod.string()
-})),
-  "createdAt": zod.string()
-})
-
-
+export const AnalyzeNoticeResponse = AnalysisResponse
 /**
  * @summary Ask a grounded question about a notice
  */
-
-
-
 export const AskNoticeParams = zod.object({
   "noticeId": zod.coerce.number().int().min(1)
 })
-
 export const askNoticeBodyQuestionMax = 500;
-
-
-
 export const AskNoticeBody = zod.object({
   "question": zod.string().min(1).max(askNoticeBodyQuestionMax)
 })
-
 export const AskNoticeResponse = zod.object({
   "question": zod.string(),
   "answer": zod.string(),
   "groundedIn": zod.array(zod.string())
 })
-
-
 /**
  * @summary Get private history summary
  */
@@ -228,5 +170,3 @@ export const GetDashboardResponse = zod.object({
   "createdAt": zod.string()
 }))
 })
-
-

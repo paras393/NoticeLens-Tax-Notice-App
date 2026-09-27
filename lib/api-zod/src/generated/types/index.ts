@@ -16,6 +16,7 @@ export * from './answer';
 export * from './askQuestionInput';
 export * from './dashboard';
 export * from './extractedNotice';
+export * from './evidenceItem';
 export * from './healthStatus';
 export * from './notice';
 export * from './noticeDetail';
