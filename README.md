@@ -29,7 +29,7 @@ Open `http://localhost:4173`. The frontend development server proxies `/api` req
 
 ### Or use the hosted demo
 
-Judges can either run NoticeLens locally using the steps above or open the [hosted demo](https://notice-lens-tax-notice-app--rahul5556.replit.app) directly in a browser. For the quickest review, choose a notice marked **DEMO — FICTIONAL DATA**.
+You can either run NoticeLens locally using the steps above or open the [hosted demo](https://notice-lens-tax-notice-app--rahul5556.replit.app) directly in a browser.
 
 ## Core experience
 
