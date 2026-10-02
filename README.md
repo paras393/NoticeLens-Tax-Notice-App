@@ -27,6 +27,10 @@ PORT=4173 BASE_PATH=/ pnpm --filter @workspace/notice-lens run dev
 
 Open `http://localhost:4173`. The frontend development server proxies `/api` requests to the API on port 5000.
 
+### Or use the hosted demo
+
+Judges can either run NoticeLens locally using the steps above or open the [hosted demo](https://notice-lens-tax-notice-app--rahul5556.replit.app) directly in a browser. For the quickest review, choose a notice marked **DEMO — FICTIONAL DATA**.
+
 ## Core experience
 
 1. Upload a PDF, JPG, JPEG, or PNG notice and select GST, Income Tax, or Not Sure.
