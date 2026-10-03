@@ -354,6 +354,11 @@ button:focus-visible, a:focus-visible, input:focus-visible {
 .ask-icon.large { width: 44px; height: 44px; border-radius: 10px; }
 .ask-card h2 { margin: 0 0 6px; font-size: 21px; letter-spacing: -.04em; }
 .ask-card > p { color: #B8CDC6; font-size: 12px; line-height: 1.5; max-width: 410px; }
+.ask-locked { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 16px; color: #F0C99E; font: 10px var(--app-font-mono); text-transform: uppercase; letter-spacing: .05em; }
+.ask-locked-page { max-width: 650px; padding: clamp(28px, 6vw, 58px); background: var(--petrol); color: #F4F1EA; border: 1px solid var(--petrol); }
+.ask-locked-page .eyebrow { margin-top: 22px; color: #A8C4B9; }
+.ask-locked-page h1 { margin: 8px 0 14px; font-size: clamp(31px, 5vw, 48px); letter-spacing: -.06em; }
+.ask-locked-page p { max-width: 510px; color: #B8CDC6; font-size: 13px; line-height: 1.65; margin-bottom: 24px; }
 .ask-page-card { max-width: 790px; padding: clamp(25px, 5vw, 46px); background: var(--petrol); color: #F4F1EA; border: 1px solid var(--petrol); }
 .ask-page-intro { display: flex; align-items: center; gap: 13px; }
 .ask-page-card .eyebrow { color: #A8C4B9; }
