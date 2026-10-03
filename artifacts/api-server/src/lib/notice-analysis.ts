@@ -191,10 +191,10 @@ function buildSections(
       key: "meaning",
       title: "What does this mean?",
       body: isDemand
-        ? "This appears to concern a tax, interest, penalty, or another amount described in the notice. Whether anything is presently payable depends on the document stage and the exact wording."
+        ? "The department says there may be a tax, interest, or penalty issue and wants you to review the amount described and respond before it decides the next step."
         : isInfoRequest
-          ? "This appears to be a compliance or information step. It is not automatically a finding that you have done something wrong."
-          : "Read the requested action and the dates in the notice together. This analysis explains the document; it does not decide disputed facts or legal validity.",
+          ? "The department is asking for information or documents so it can complete its review; this request is not, by itself, a finding that you did something wrong."
+          : "The department is asking you to respond to a specific issue or request described in the notice, using the stated deadline and requested action as your guide.",
       tone: "default",
     },
     {
