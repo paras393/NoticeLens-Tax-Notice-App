@@ -8,6 +8,12 @@ NoticeLens is a grounded workspace for Indian GST and Income Tax notices. It hel
 
 Tax notices are often difficult to interpret quickly, especially when the recipient does not have immediate access to a Chartered Accountant or tax lawyer. NoticeLens reduces confusion without pretending to replace professional advice. It extracts practical facts from a notice, explains supported terms in plain language, and clearly indicates when the available information is not enough.
 
+## Post-submission updates
+
+After submitting this project for Shipaton 2026, we continued improving the interface and user experience. These updates include a clearer notice-meaning summary, a simplified extracted-details section, collapsible explanations, and Plus-gated Ask My Notice and officer-message features.
+
+These improvements were made after the original submission and are shared for transparency. The submitted video and entry represent the version submitted before the deadline.
+
 
 ## Run locally
 
