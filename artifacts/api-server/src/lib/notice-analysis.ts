@@ -159,14 +159,38 @@ function explainWhy(type: string, extracted: ExtractedNotice, knowledge: string)
   return insufficientInformation;
 }
 
+function explainMeaning(type: string, extracted: ExtractedNotice): string {
+  const action = extracted.requestedAction !== NOT_FOUND ? extracted.requestedAction : "a response";
+  const amount = extracted.amounts.find((value) => value !== NOT_FOUND);
+  if (/GST scrutiny|discrepancy/i.test(type)) {
+    return `The GST department has found a possible mismatch in your reported figures and is asking you to explain or reconcile it through ${action.toLowerCase()}.`;
+  }
+  if (/GST show-cause|GST demand/i.test(type)) {
+    return amount
+      ? `The GST department says this notice concerns ${amount} in tax, interest, or penalty and is asking you to respond before the amount is finalized.`
+      : `The GST department believes tax, interest, or penalty may be payable and is asking you to respond before the amount is finalized.`;
+  }
+  if (/Income Tax information request/i.test(type)) {
+    return `The Income Tax Department is asking you to submit specific information or documents so it can complete your assessment.`;
+  }
+  if (/Income Tax scrutiny/i.test(type)) {
+    return `The Income Tax Department is reviewing information in your return and is asking you to respond to the issue or provide the requested support.`;
+  }
+  if (/cancellation/i.test(type)) {
+    return `The department is considering an action that may affect your registration and is asking you to respond to the reason stated in the notice.`;
+  }
+  if (extracted.requestedAction !== NOT_FOUND) {
+    return `The department is asking you to ${action.toLowerCase()} in response to the issue described in this notice.`;
+  }
+  return `This notice asks you to respond to an issue, but the document does not clearly explain the reason for the request.`;
+}
+
 function buildSections(
   type: string,
   extracted: ExtractedNotice,
   matched: ReturnType<typeof retrieveKnowledge>,
 ): AnalysisSection[] {
   const primary = matched[0]?.summary ?? NOT_FOUND;
-  const isDemand = /demand|show-cause/i.test(type);
-  const isInfoRequest = /information|scrutiny/i.test(type);
   const details =
     extracted.amounts.some((amount) => amount !== NOT_FOUND) ||
     extracted.referenceNumber !== NOT_FOUND ||
@@ -190,11 +214,7 @@ function buildSections(
     {
       key: "meaning",
       title: "What does this mean?",
-      body: isDemand
-        ? "The department says there may be a tax, interest, or penalty issue and wants you to review the amount described and respond before it decides the next step."
-        : isInfoRequest
-          ? "The department is asking for information or documents so it can complete its review; this request is not, by itself, a finding that you did something wrong."
-          : "The department is asking you to respond to a specific issue or request described in the notice, using the stated deadline and requested action as your guide.",
+      body: explainMeaning(type, extracted),
       tone: "default",
     },
     {
