@@ -10,7 +10,7 @@ Tax notices are often difficult to interpret quickly, especially when the recipi
 
 ## Post-submission updates
 
-After submitting this project for Shipaton 2026, we continued improving the interface and user experience. These updates include a clearer notice-meaning summary, a simplified extracted-details section, collapsible explanations, and Plus-gated Ask My Notice and officer-message features.
+After the original submission, we continued improving the interface and user experience. These updates include a clearer notice-meaning summary, a simplified extracted-details section, collapsible explanations, and Plus-gated Ask My Notice and officer-message features.
 
 These improvements were made after the original submission and are shared for transparency. The submitted video and entry represent the version submitted before the deadline.
 
